@@ -51,7 +51,8 @@ void do_work(struct User *user){
 
     recv(user->fd, (void *)&msg, sizeof(msg), 0);
     if (msg.type & CHAT_WALL) {
-        printf("<%s> ~ %s \n", user->name, msg.msg);   
+        printf("<%s> ~ %s \n", user->name, msg.msg); 
+        strcpy(msg.name, user->name);
         send_all(&msg);//公聊信息发给所有人
     } else if (msg.type & CHAT_MSG) {
         printf("<%s> $ %s \n", user->name, msg.msg); 
@@ -67,6 +68,7 @@ void do_work(struct User *user){
             send(user->fd, (void *)&r_msg, sizeof(r_msg), 0);
         } else {
             msg.type = CHAT_MSG;
+            strcpy(msg.name, user->name);
             strncpy(to, msg.msg + 1, i - 1);
             send_to(to, &msg, user->fd);
         }
