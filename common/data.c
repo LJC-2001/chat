@@ -6,3 +6,7 @@
  ************************************************************************/
 
 char conf_ans[50] = {0};
+int pott;
+struct User *rteam;
+struct User *bteam;
+int repollfd, bepollfd;
