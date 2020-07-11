@@ -19,6 +19,16 @@ int port = 0;
 pthread_mutex_t rmutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t bmutex = PTHREAD_MUTEX_INITIALIZER;
 
+void logouts(int signum)
+{
+    struct ChatMsg msg;
+    bzero(&msg, sizeof(msg));
+    msg.type = CHAT_FIN;
+    sprintf(msg.msg, "server closed!");
+    send_all(&msg);
+    exit(1);
+}
+
 int main(int argc, char **argv) {
     int opt, listener, epollfd;
     pthread_t red_t, blue_t;
@@ -89,6 +99,7 @@ int main(int argc, char **argv) {
     bzero(&client, sizeof(client));
     socklen_t len = sizeof(client);
 
+    signal(SIGINT, logouts);
     while (1) {
         DBG(YELLOW"Main Reactor"NONE" : Waiting for clienti.\n");
         int nfds = epoll_wait(epollfd, events, MAX * 2, -1); 
