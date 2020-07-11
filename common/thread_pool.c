@@ -42,6 +42,28 @@ void send_to(char *to, struct ChatMsg *msg, int fd)
     }
 }
 
+void who_online(struct User *user, struct ChatMsg *r_msg)
+{
+    int count = 0;
+    bzero(r_msg, sizeof(r_msg));
+    r_msg->type = CHAT_SYS;
+    for (int i = 0; i < MAX; i++) {
+        if (rteam[i].online) {
+            strcpy(r_msg->msg, rteam[i].name);
+            send(user->fd, (void *)r_msg, sizeof(struct ChatMsg), 0);
+            count++;
+        }
+        if (bteam[i].online) {
+            strcpy(r_msg->msg, bteam[i].name);
+            send(user->fd, (void *)r_msg, sizeof(struct ChatMsg), 0);
+            count++;
+        }
+    }
+    memset(r_msg->msg, 0, sizeof(r_msg->msg));
+    sprintf(r_msg->msg, "目前共有 %d 人在线", count);
+    send(user->fd, (void *)r_msg, sizeof(struct ChatMsg), 0);
+}
+
 void do_work(struct User *user){
     //受到一条信息并打印
     struct ChatMsg msg;
@@ -93,6 +115,12 @@ void do_work(struct User *user){
         }
         printf(GREEN"Server Info"NONE"%s logout\n", user->name);
         close(user->fd);
+    } else if (msg.type & CHAT_FUNC) {
+        r_msg.type = CHAT_SYS;
+        sprintf(r_msg.msg, "目前在线人员如下：");
+        send(user->fd, (void *)&r_msg, sizeof(struct ChatMsg), 0);
+        //memset(r_msg.msg, 0, sizeof(r_msg.msg));
+        who_online(user, &r_msg);
     }
 }
 
